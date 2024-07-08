@@ -2,5 +2,5 @@
 venv/
 db.sqlite3
 
-api/__pycache__/
-recipe/__pycache__/
+recipe/api/__pycache__/
+recipe/recipe/__pycache__/
