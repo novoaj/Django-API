@@ -2,5 +2,6 @@
 venv/
 db.sqlite3
 
+recipe/.env
 recipe/api/__pycache__/
 recipe/recipe/__pycache__/
