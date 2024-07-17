@@ -17,5 +17,4 @@ run docker container on port 8000 with port forwarding. Add -d flag to run conta
 ```bash
 docker run -p 8000:8000 api
 docker run -d -p 8000:8000 api
-```
-```bash
+
