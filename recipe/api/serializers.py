@@ -10,7 +10,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["email", "username", "password"]
+        fields = ["id", "email", "username", "password", "tokens"]
 
     def validate(self, attrs):
         email = attrs.get("email", "")
@@ -37,7 +37,7 @@ class LoginSerializer(serializers.ModelSerializer):
             }
     class Meta:
         model = User
-        fields = ["username", "password", "tokens"]
+        fields = ["id", "username", "password", "tokens"]
     def validate(self, attrs):
         username = attrs.get("username", "")
         password = attrs.get("password", "")
@@ -49,8 +49,9 @@ class LoginSerializer(serializers.ModelSerializer):
 
         if not user.is_active:
             raise AuthenticationFailed("Account disabled, contact admin")
-
+        print(attrs)
         return {
+            "id": user.id,
             "email": user.email,
             "username": user.username,
             "tokens": user.tokens
