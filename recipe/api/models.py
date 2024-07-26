@@ -18,3 +18,18 @@ class User(AbstractUser):
             "access": str(refresh.access_token)
         }
 
+class Recipe(models.Model):
+    api_id = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.api_id
+
+class UserRecipe(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('user', 'recipe')  # Ensures no duplicates
+        
+    def __str__(self):
+        return f"{self.user.username} - {self.recipe.api_id}"

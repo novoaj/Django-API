@@ -29,7 +29,7 @@ SECRET_KEY = "django-insecure-6ket@#ve_%*a6ue&#z4(8@+zh-pa%6^7tff4aw0=-vwm+5*!2u
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", os.getenv("ALLOWED_HOSTS")]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", os.getenv("ALLOWED_HOSTS")]
 
 AUTH_USER_MODEL = "api.User"
 # Application definition
@@ -42,28 +42,31 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "rest_framework",
+    "rest_framework_simplejwt",
     "rest_framework_simplejwt.token_blacklist",
-    "api"
+    "api",
+    "corsheaders"
 ]
 
 from datetime import timedelta
 
 REST_FRAMEWORK = {
-    # "DEFAULT_PERMISSION_CLASSES": (
-    #     "rest_framework.permissions.IsAuthenticated",
-    # ),
+    "DEFAULT_PERMISSION_CLASSES": (
+        "rest_framework.permissions.IsAuthenticated",
+    ),
     "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=1),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
 }
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
@@ -71,6 +74,18 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8000",
+#     "http://127.0.0.1:8000",
+#     os.getenv("MY_IPV4") # my laptop's current public facing ip
+# ]
+CORS_ORIGIN_ALLOW_ALL = True   # TODO: fix this, limit origins that can access this api
+CORS_ALLOWED_HEADERS = [
+    "content-type",
+    "authorization",
+    "x-csrftoken",
+    "Access-Control-Allow-Origin",
+]
 ROOT_URLCONF = "recipe.urls"
 
 TEMPLATES = [
@@ -97,8 +112,12 @@ WSGI_APPLICATION = "recipe.wsgi.application"
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": "postgres",
+        "USER": os.getenv("DB_USER"),
+        "PASSWORD": os.getenv("DB_PASSWORD"),
+        "HOST": os.getenv("DB_HOST"),
+        "PORT": os.getenv("DB_PORT")
     }
 }
 
