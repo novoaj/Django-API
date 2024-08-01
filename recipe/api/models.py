@@ -20,6 +20,8 @@ class User(AbstractUser):
 
 class Recipe(models.Model):
     api_id = models.CharField(max_length=255)
+    title = models.CharField(max_length=255, default='')
+    thumbnail = models.URLField(max_length=2500, default='') # urls to images in s3 can be extremely long
 
     def __str__(self):
         return self.api_id

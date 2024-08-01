@@ -70,7 +70,7 @@ class LogoutSerializer(serializers.Serializer):
 class RecipeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Recipe
-        fields = ['api_id']
+        fields = ['api_id', 'title', 'thumbnail']
 
 class UserRecipeSerializer(serializers.ModelSerializer):
     recipe = RecipeSerializer()

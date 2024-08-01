@@ -43,8 +43,10 @@ class LoginView(generics.GenericAPIView):
             return Response({"error": "An error occurred, please try again"}, status=status.HTTP_400_BAD_REQUEST)
 
 class LogoutView(generics.GenericAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
     serializer_class = LogoutSerializer
-    permission_classes = (permissions.IsAuthenticated,)
     def post(self, request):
         serializer = self.serializer_class(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -60,6 +62,7 @@ class UserRecipeListView(generics.ListAPIView):
     def get_queryset(self):
         # Return recipes for the currently authenticated user
         user = self.request.user
+        print("Authenticated user:", user)  # Debug line to print the authenticated user
         return UserRecipe.objects.filter(user=user)[:10]
 
 class UserRecipeCreateView(generics.CreateAPIView):
@@ -68,15 +71,21 @@ class UserRecipeCreateView(generics.CreateAPIView):
 
     serializer_class = UserRecipeSerializer
     def post(self, request):
-        print(request)
         # get user id from request?
         user=request.user
         # get recipe id
-        recipe_uri = request.data.get('recipe')
-        if not recipe_uri:
-            return Response({'error': 'Recipe URI is required'}, status=status.HTTP_400_BAD_REQUEST)
+        recipe_data = request.data.get('recipe')
+        recipe_id = recipe_data.get("id")
+        label = recipe_data.get("label")
+        thumbnail = recipe_data.get("thumbnail")
+        if not recipe_id or not label or not thumbnail:
+            return Response({'error': 'Recipe ID, title, and thumbnail are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
         # ensure recipe exists or gets created
-        recipe, created = Recipe.objects.get_or_create(api_id=recipe_uri)
+        recipe, created = Recipe.objects.get_or_create(
+                api_id=recipe_id,
+                defaults={'title': label, 'thumbnail': thumbnail}
+            )
         # UserRecipe entry
         try:
             user_recipe, created = UserRecipe.objects.get_or_create(user=user, recipe=recipe)
@@ -86,3 +95,16 @@ class UserRecipeCreateView(generics.CreateAPIView):
                 return Response({'message': 'Recipe already saved for this user'}, status=status.HTTP_200_OK)
         except IntegrityError:
             return Response({'error': 'Error saving recipe'}, status=status.HTTP_400_BAD_REQUEST)
+
+class UserRecipeDeleteView(generics.DestroyAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def delete(self, request, recipe_id):
+        user = request.user
+        try:
+            user_recipe = UserRecipe.objects.get(user=user, recipe__api_id=recipe_id)
+            user_recipe.delete()
+            return Response({'message': 'Recipe link deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+        except UserRecipe.DoesNotExist:
+            return Response({'error': 'Recipe link not found'}, status=status.HTTP_404_NOT_FOUND)
