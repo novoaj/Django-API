@@ -9,7 +9,7 @@ This project is a Dockerized Django API with JWT authentication for a mobile rec
 - Django Rest Framework
 - PostgreSQL
 - AWS Elastic Compute Cloud (EC2)
-- AWS Relation Database Services (RDS)
+- AWS Relational Database Service (RDS)
 
 ## Get started
 ### Prerequisites
